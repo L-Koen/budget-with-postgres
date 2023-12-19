@@ -1,0 +1,252 @@
+openapi: 3.0.3
+info:
+  title: Budget Project - OpenAPI 3.0
+  description: |-
+    This is a sample Personal Envelopes Budget based on the OpenAPI 3.0 specification. You can find out more about
+    Swagger at [https://swagger.io](https://swagger.io). In this iteration of the Personal Envelopes Budget Project I use a Postgres database for data persistence. Docker is still used for containerization.
+    
+    Some useful links:
+    - [Evnelopes for budgeting](https://www.nerdwallet.com/article/finance/envelope-system)
+    - [Mocha and Postgres integration tests](https://medium.com/geoblinktech/postgres-and-integration-testing-in-node-js-apps-2e1b52af7ffc)
+  license:
+    name: GPL-3
+  version: 1.0.0
+servers:
+  - url: localhost:3000/
+tags:
+  - name: envelopes
+    description: Get all envelopes and keep track of your budget
+paths:
+  /envelopes:
+    get:
+      tags:
+        - envelopes
+      summary: Get all envelopes
+      description: Query the database for all envelopes
+      responses:
+        '200':
+          description: Succesful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+        '500':
+          description: Something unexpected went wrong in the backend
+                
+    post:
+      tags:
+        - envelope
+      summary: Start a new envelope
+      description: Add a new envelope to the database
+      operationId: addPet
+      requestBody:
+        description: Create a new envelope for budgeting
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Envelope'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Envelope'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Envelope'
+        required: true
+      responses:
+        '201':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'          
+        '405':
+          description: Invalid input
+  /envelopes/{envelopeId}:
+    get:
+      tags:
+        - envelope
+      summary: Find envelope by ID
+      description: Returns a single envelope
+      operationId: getEnvelopeById
+      parameters:
+        - name: envelopeId
+          in: path
+          description: ID of envelope to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'          
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Envelope not found
+    put:
+      tags:
+        - envelope
+      summary: Updates a envelope in the database based on id and supplied partameters
+      description: ''
+      operationId: updatePetWithForm
+      parameters:
+        - name: envelopeId
+          in: path
+          description: ID of envelope that needs to be updated
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Parameters to use for the update
+        content:
+          application/json:
+              schema:
+                $ref: '#/components/schemas/AmountUpdate'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'          
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Envelope not found
+        '405':
+          description: Invalid input
+
+    delete:
+      tags:
+        - envelope
+      summary: Deletes an empty envelope
+      description: delete an emptyenvelope
+      operationId: deleteEnvelope
+      parameters:
+        - name: envelopeId
+          in: path
+          description: Envelope id to delete
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: successful deletion
+        '400':
+          description: Invalid ID value
+        '405':
+          description: Envelope was not empty
+        
+  /envelopes/transfer/{fromID}/{toID}:
+    post:
+      tags: 
+        - envelope
+        -  transfer
+      summary: Transfer money between envelopes
+      description: Transfer money based on envelopeID if funds allows
+      requestBody: 
+        description: transfer amount (always positive)
+        content: 
+          text/plain:
+            schema: 
+              type: number
+              minimum: 0
+              example: 50
+        required: true
+            
+      parameters:
+        - name: fromID
+          in: path
+          description: Envelope from where the money originates
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: toID
+          in: path
+          description: Envelope where the money ends up
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'          
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Envelope not found
+        '405':
+          description: Invalid input
+          
+components:
+  schemas:
+    Envelope:
+      required:
+        - name
+        - amount
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+        name:
+          type: string
+          example: home
+        amount:
+          type: number
+          format: float
+          example: 77.77
+          minimum: 0
+      xml:
+        name: envelope
+        
+    AmountUpdate:
+      required:
+        - amount
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+        name:
+          type: string
+          example: home
+        amount:
+          type: number
+          format: float
+          example: 77.77
+          minimum: 0
+      xml:
+        name: amountupdate
+  requestBodies:
+    Envelope:
+      description: envelope object that needs to be added or retrieved from the database
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Envelope'
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/Envelope'
+    AmountUpdate:
+      description: envelope object that needs to be added to the store
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AmountUpdate'
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/AmountUpdate'
