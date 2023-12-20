@@ -107,6 +107,7 @@ paths:
           application/json:
               schema:
                 $ref: '#/components/schemas/AmountUpdate'
+        required: true
       responses:
         '200':
           description: successful operation
@@ -152,12 +153,10 @@ paths:
       description: Transfer money based on envelopeID if funds allows
       requestBody: 
         description: transfer amount (always positive)
-        content: 
-          text/plain:
-            schema: 
-              type: number
-              minimum: 0
-              example: 50
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Amount'
         required: true
             
       parameters:
@@ -231,6 +230,19 @@ components:
           minimum: 0
       xml:
         name: amountupdate
+    Amount:
+      required:
+        - amount
+      type: object
+      properties:
+       amount:
+          type: number
+          format: float
+          example: 77.77
+          minimum: 0
+      xml:
+        name: amount
+  
   requestBodies:
     Envelope:
       description: envelope object that needs to be added or retrieved from the database
@@ -250,3 +262,12 @@ components:
         application/xml:
           schema:
             $ref: '#/components/schemas/AmountUpdate'
+    Amount:
+      description: amount for transfer between envelopes
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Amount'
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/Amount'
