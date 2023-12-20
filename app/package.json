@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha --timeout=10000 --exit",
+    "start": "node index.js"
   },
   "author": "Koen",
   "license": "ISC",
